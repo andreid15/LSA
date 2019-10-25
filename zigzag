@@ -1,0 +1,35 @@
+import time
+
+delay = 0.02 # Milliseconds of delay
+loops_left = 10
+
+# Start the main loop only when the user is ready
+print('This will zig-zag 10 times.')
+ready = input('Are you ready? Y / N\t')
+
+if ready.upper() in ('Y', 'YES', '1', 'TRUE', ''):
+    # This main loop runs 10 times
+    while loops_left:
+        # Zig to the left
+        for indent_size in range(25):
+            print(' ' * indent_size + 'ZigZag')
+            time.sleep(delay)
+
+        # Zig to the right
+        for indent_size in range(24, -1, -1):
+            print(' ' * indent_size + 'ZigZag')
+            time.sleep(delay)
+
+        # Decreasing the counter so that we won't be stuck in an infinite loop
+        loops_left -= 1
+
+        # When the main loop has finished the user can choose to run it again or not
+        if loops_left == 0:
+            want_to_continue = input('\nDo you want to continue? Y / N\t')
+            if want_to_continue.upper() in ('Y', 'YES', '1', 'TRUE', ''):
+                loops_left = 10
+
+    print('Come back soon!')
+
+else:
+    print('Run the program again when you are ready.')
