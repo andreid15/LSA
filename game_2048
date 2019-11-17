@@ -1,0 +1,256 @@
+import random
+import sys
+
+BLANK = ''
+
+
+def create_new_board():
+    """This function returns a dictionary with 16 elements.
+    2 elements have their values set to the integer 2.
+    The rest of the 14 elements have their values set to an empty string"""
+
+    # A board is printed like a table with rows and columns, implemented as a dictionary.
+    # Each key in the dictionary is a tuple with two integers (row, column) that are used to
+    # identify a certain cell. The value associated with the key is the value in the cell.
+    # The dictionary keys are called the coordinates of the cell.
+    # For example, the value in the upper most left corner can be found at row 0 and column 0, or tuple (0,0).
+    # The value in the next cell to the right can be found at row 0 and column 1, or tuple (0,1).
+
+    #   0 1 2 3
+    # 0| | | | |  row
+    # 1| | | | |  row
+    # 2| | | | |  row
+    # 3| | | | |  row
+    #
+    #   c c c c
+    #   o o o o
+    #   l l l l
+    #   u u u u
+    #   m m m m
+    #   n n n n
+
+    board = {}
+
+    # Filling the dictionary with empty values.
+    # Creating coordinate-type keys and assigning them an empty string.
+    # It's like filling the board with empty elements.
+    for row in range(4):
+        for col in range(4):
+            board[(row, col)] = BLANK
+
+    # The board needs two starting "2" integers placed randomly inside.
+    # Before we do that, we pick two random coordinates.
+    # A set will eliminate duplicates.
+    # While the set has less than two elements, keep generating coordinates.
+    random_positions = set()
+    while len(random_positions) < 2:
+        random_positions.add((random.randint(0, 3), random.randint(0, 3)))
+
+    # Extracting each position from the set and using it to
+    # place both 2's in the board dictionary.
+    for random_position in random_positions:
+        board[random_position] = 2
+
+    return board
+
+
+def draw_board(board):
+    """This function takes a dictionary as an argument, then prints a human-friendly representation of it."""
+
+    # Copying all the values from the dictionary to an empty list.
+    # Getting each dictionary value, converting it to a string,
+    # formatting it to a length of 5 characters, then adding it to a list.
+    values = []
+    for key in board:
+        values.append(str(board[key]).center(5))
+
+    # This variable is the string instance from which
+    # the format method will be called. It contains all
+    # the necessary placeholders.
+    display_image = """
+    +-----+-----+-----+-----+
+    |     |     |     |     |
+    |{}|{}|{}|{}|
+    |     |     |     |     |
+    +-----+-----+-----+-----+
+    |     |     |     |     |
+    |{}|{}|{}|{}|
+    |     |     |     |     |
+    +-----+-----+-----+-----+
+    |     |     |     |     |
+    |{}|{}|{}|{}|
+    |     |     |     |     |
+    +-----+-----+-----+-----+
+    |     |     |     |     |
+    |{}|{}|{}|{}|
+    |     |     |     |     |
+    +-----+-----+-----+-----+
+    """
+
+    # List unpacking returns all 16 list elements which are then passed as arguments
+    # to the format method in order to be placed in the 16 placeholders of the string.
+    print(display_image.format(*values))
+
+
+def get_player_move():
+    """This function returns the player's move as an uppercase string.
+    The player can also choose to quit the game, in which case the program execution is interrupted."""
+
+    # Keep asking for a move until a valid one is entered.
+    while True:
+        move = input('Enter move: W, A, S, D. To Quit, press Q\t').upper()
+        if move in ('W', 'A', 'S', 'D'):
+            return move
+        if move == 'Q':
+            print('Goodbye!')
+            sys.exit()
+        print('Only enter W, A, S, D, Q.')
+
+
+def make_move(board, move):
+    """This function returns a board dictionary after it rearranges the values
+    in it, according to the player move. This function also calls the 'squish_column' function"""
+
+    # Hardcoding all indexes based on direction
+    if move == 'W':
+        all_indexes = (
+                      ((0, 0), (1, 0), (2, 0), (3, 0)),
+                      ((0, 1), (1, 1), (2, 1), (3, 1)),
+                      ((0, 2), (1, 2), (2, 2), (3, 2)),
+                      ((0, 3), (1, 3), (2, 3), (3, 3))
+                      )
+
+    elif move == 'S':
+        all_indexes = (
+                      ((3, 0), (2, 0), (1, 0), (0, 0)),
+                      ((3, 1), (2, 1), (1, 1), (0, 1)),
+                      ((3, 2), (2, 2), (1, 2), (0, 2)),
+                      ((3, 3), (2, 3), (1, 3), (0, 3))
+                      )
+
+    elif move == 'A':
+        all_indexes = (
+                      ((0, 0), (0, 1), (0, 2), (0, 3)),
+                      ((1, 0), (1, 1), (1, 2), (1, 3)),
+                      ((2, 0), (2, 1), (2, 2), (2, 3)),
+                      ((3, 0), (3, 1), (3, 2), (3, 3))
+                      )
+
+    elif move == 'D':
+        all_indexes = (
+                      ((0, 3), (0, 2), (0, 1), (0, 0)),
+                      ((1, 3), (1, 2), (1, 1), (1, 0)),
+                      ((2, 3), (2, 2), (2, 1), (2, 0)),
+                      ((3, 3), (3, 2), (3, 1), (3, 0))
+                      )
+
+    for cell_coordinates in all_indexes:
+        first_cell_coordinates = cell_coordinates[0]
+        first_cell_value = board[first_cell_coordinates]
+
+        second_cell_coordinates = cell_coordinates[1]
+        second_cell_value = board[second_cell_coordinates]
+
+        third_cell_coordinates = cell_coordinates[2]
+        third_cell_value = board[third_cell_coordinates]
+
+        fourth_cell_coordinates = cell_coordinates[3]
+        fourth_cell_value = board[fourth_cell_coordinates]
+
+        column = [first_cell_value, second_cell_value, third_cell_value, fourth_cell_value]
+        # In-place function, overwrites the argument.
+        squish_column(column)
+
+        # Assigning the rearranged and squished values to the board dictionary.
+        board[first_cell_coordinates] = column[0]
+        board[second_cell_coordinates] = column[1]
+        board[third_cell_coordinates] = column[2]
+        board[fourth_cell_coordinates] = column[3]
+
+    return board
+
+
+def squish_column(column):
+    """This function adds two values if they are next to each other and if they are equal."""
+    # For example, if column = [2, BLANK, BLANK, 2],
+    # after 'squishing' column = [4, BLANK, BLANK, BLANK].
+    # [2, BLANK, 4, BLANK] becomes [2, 4, BLANK, BLANK]
+    # [2, 4, 4, BLANK] becomes [2, 8, BLANK, BLANK]
+
+    column_numbers = []
+    for index in range(len(column)):
+        if column[index] != BLANK:
+            column_numbers.append(column[index])
+            column[index] = BLANK
+
+    for i, number in enumerate(column_numbers):
+        column[i] = number  # Copies column_numbers to column
+
+    # Squish/combining step:
+    for starting_index in range(3):  # Do not include index 3 since nothing can be on top of it.
+        if column[starting_index] == column[starting_index + 1]:
+            column[starting_index] *= 2
+            for above_index in range(starting_index+1, 3):
+                column[above_index] = column[above_index + 1]
+            column[3] = BLANK
+
+
+def add_two_to_board(board):
+    """This function takes a dictionary as an argument and
+    returns the dictionary after having randomly inserted a new 2 into it."""
+
+    # Get all the keys that are associated with empty values, from the board dictionary,
+    # and store these keys in a list.
+    keys_with_empty_values = []
+    for key in board:
+        if board[key] == BLANK:
+            keys_with_empty_values.append(key)
+
+    # Randomly choose a key from the list and put a 2 in it.
+    # The choice function cannot choose from an empty list.
+    if len(keys_with_empty_values) > 0:
+        empty_choice = random.choice(keys_with_empty_values)
+        board[empty_choice] = 2
+
+    return board
+
+
+def is_full(board):
+    """This function checks for empty values(ie '') in the board dictionary,
+    then returns True if the dictionary is full."""
+
+    for key in board:
+        if board[key] == BLANK:
+            return False
+    return True
+
+
+# Creating a new board with 2 random 2's and 14 empty elements.
+game_board = create_new_board()
+
+# Run the game until the player asks to quit
+# or the board is full and the game is lost.
+while True:
+    # Print a human-friendly representation of the board dictionary.
+    draw_board(game_board)
+
+    # Ask the player to make a move, then return the move
+    player_move = get_player_move()
+
+    # Move values in the board dictionary, according to the player choice
+    # and squish values when they are the same.
+    game_board = make_move(game_board, player_move)
+
+    # Place a new 2 in the board, then return the board
+    game_board = add_two_to_board(game_board)
+
+    # Print a human-friendly representation of the board dictionary.
+    draw_board(game_board)
+
+    # Check to see if the board is full, meaning that the player has lost.
+    # If so, stop the game.
+    if is_full(game_board):
+        draw_board(game_board)
+        print('All cells are full.')
+        print('Game over!')
+        break
